@@ -25,6 +25,19 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Features
+
+This student complaint system includes several features to enhance user experience:
+
+- **Complaint Management**: Submit, track, and manage complaints
+- **User Profile**: Manage personal information and account settings
+- **Notifications**: Stay updated on complaint status changes
+- **Image Support**: Capture photos directly or select from gallery when submitting complaints
+- **Image Display**: View complaint images in detail screen with privacy protection
+- **Gamification**: Earn points for submitting complaints and participating in the system
+- **Leaderboard**: Compete with other students on the leaderboard based on participation
+- **Development Roadmap**: View our future plans and upcoming features in the Milestones section
+
 ## Get a fresh project
 
 When you're ready, run:
