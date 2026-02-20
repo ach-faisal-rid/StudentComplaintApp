@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getAuthToken, removeAuthToken } from './storage';
 
 // Use environment variable for API URL, with fallback to localhost
-const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000'}/api`;
+const API_BASE_URL = `${process.env.EXPO_PUBLIC_API_URL || 'http://192.168.0.104:8000'}/api`;
 
 console.log('API Base URL:', API_BASE_URL); // Debug log
 

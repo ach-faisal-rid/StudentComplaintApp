@@ -1,7 +1,7 @@
 import api from './api';
 
 interface LoginData {
-  email: string;
+  identifier: string; // Bisa email, NIS, atau NIP
   password: string;
 }
 
@@ -31,7 +31,12 @@ interface AuthResponse {
 // Login user
 export const login = async (data: LoginData): Promise<AuthResponse> => {
   try {
-    const response = await api.post<AuthResponse>('/login', data);
+    // Backend expects 'identifier' (can be email, NIS, or NIP)
+    const requestData = {
+      identifier: data.identifier,
+      password: data.password,
+    };
+    const response = await api.post<AuthResponse>('/login', requestData);
     return response.data;
   } catch (error) {
     throw error;

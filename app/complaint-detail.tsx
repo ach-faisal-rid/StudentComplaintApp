@@ -66,8 +66,8 @@ const ComplaintDetailScreen = () => {
   }
 
   // Construct full image URL if image_path exists
-  const imageUrl = complaint.image_path 
-    ? `${process.env.EXPO_PUBLIC_API_URL || 'http://192.168.57.72:8000'}/storage/${complaint.image_path}`
+  const imageUrl = complaint.image_path
+    ? `${process.env.EXPO_PUBLIC_API_URL || 'http://192.168.110.89:8000'}/storage/${complaint.image_path}`
     : null;
 
   return (
@@ -78,25 +78,25 @@ const ComplaintDetailScreen = () => {
           {complaint.status.charAt(0).toUpperCase() + complaint.status.slice(1)}
         </Text>
       </View>
-      
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Description</Text>
         <Text style={styles.description}>{complaint.description}</Text>
       </View>
-      
+
       {/* Image section - only shown to students for privacy */}
       {imageUrl && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Evidence Image</Text>
           <Text style={styles.privacyNotice}>This image is only visible to you and school administrators for privacy protection.</Text>
-          <Image 
-            source={{ uri: imageUrl }} 
+          <Image
+            source={{ uri: imageUrl }}
             style={styles.image}
             resizeMode="contain"
           />
         </View>
       )}
-      
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Details</Text>
         <View style={styles.detailRow}>

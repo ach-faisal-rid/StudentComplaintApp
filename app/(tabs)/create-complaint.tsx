@@ -1,16 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, Image, ActionSheetIOS, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { createComplaint } from '../../services/complaintService';
+import { Picker } from '@react-native-picker/picker';
+import { createComplaint, getCategories, Category } from '../../services/complaintService';
 
 const CreateComplaintScreen = () => {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>('medium');
+  const [categories, setCategories] = useState<Category[]>([]);
   const [image, setImage] = useState<string | null>(null);
   const [imageAsset, setImageAsset] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const cats = await getCategories();
+      setCategories(cats);
+    } catch (error: any) {
+      console.error('Error loading categories:', error);
+      Alert.alert('Error', 'Failed to load categories. Please try again.');
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   const selectImageSource = () => {
     if (Platform.OS === 'ios') {
@@ -96,17 +118,21 @@ const CreateComplaintScreen = () => {
       return;
     }
 
+    if (!categoryId) {
+      Alert.alert('Error', 'Please select a category');
+      return;
+    }
+
     setLoading(true);
     try {
-      // Prepare data for submission
-      const complaintData: any = { title, description };
-      
       // Add image if selected
       if (imageAsset) {
         // Convert URI to Blob for upload
         const formData = new FormData();
         formData.append('title', title);
         formData.append('description', description);
+        formData.append('category_id', categoryId.toString());
+        formData.append('priority', priority);
         
         // Append image file
         const fileName = imageAsset.uri.split('/').pop() || 'image.jpg';
@@ -120,7 +146,12 @@ const CreateComplaintScreen = () => {
         
         await createComplaint(formData as any);
       } else {
-        await createComplaint({ title, description });
+        await createComplaint({ 
+          title, 
+          description, 
+          category_id: categoryId,
+          priority 
+        });
       }
       
       Alert.alert('Success', 'Complaint submitted successfully', [
@@ -147,6 +178,46 @@ const CreateComplaintScreen = () => {
           value={title}
           onChangeText={setTitle}
         />
+      </View>
+
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Category *</Text>
+        {loadingCategories ? (
+          <Text style={styles.loadingText}>Loading categories...</Text>
+        ) : (
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={categoryId}
+              onValueChange={(itemValue) => setCategoryId(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Select a category" value={null} />
+              {categories.map((category) => (
+                <Picker.Item 
+                  key={category.id} 
+                  label={category.name} 
+                  value={category.id} 
+                />
+              ))}
+            </Picker>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Priority</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={priority}
+            onValueChange={(itemValue) => setPriority(itemValue)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Rendah" value="low" />
+            <Picker.Item label="Sedang" value="medium" />
+            <Picker.Item label="Tinggi" value="high" />
+            <Picker.Item label="Mendesak" value="urgent" />
+          </Picker>
+        </View>
       </View>
       
       <View style={styles.formGroup}>
@@ -335,6 +406,21 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  pickerContainer: {
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    overflow: 'hidden',
+  },
+  picker: {
+    height: 50,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
   },
 });
 

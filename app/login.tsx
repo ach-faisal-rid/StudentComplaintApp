@@ -18,7 +18,7 @@ const LoginScreen = () => {
 
     setLoading(true);
     try {
-      const response = await login({ email, password });
+      const response = await login({ identifier: email, password });
       // Save token to AsyncStorage
       await saveAuthToken(response.access_token);
       // Navigate to home screen
@@ -36,10 +36,9 @@ const LoginScreen = () => {
       
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder="Email, NIS, atau NIP"
         value={email}
         onChangeText={setEmail}
-        keyboardType="email-address"
         autoCapitalize="none"
       />
       

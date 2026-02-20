@@ -1,16 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { getComplaints, getComplaintStats } from '../../services/complaintService';
+import { getComplaints, getComplaintStats, Complaint } from '../../services/complaintService';
 import MilestonesLink from '../../components/MilestonesLink';
-
-interface Complaint {
-  id: number;
-  title: string;
-  description: string;
-  status: string;
-  created_at: string;
-}
 
 interface ComplaintStats {
   total: number;
@@ -66,25 +58,82 @@ const HomeScreen = () => {
     }
   };
 
-  const renderComplaint = ({ item }: { item: Complaint }) => (
-    <TouchableOpacity 
-      style={styles.complaintCard}
-      onPress={() => router.push({ pathname: '/complaint-detail', params: { complaintId: item.id.toString() } })}
-    >
-      <Text style={styles.complaintTitle}>{item.title}</Text>
-      <Text style={styles.complaintDescription} numberOfLines={2}>
-        {item.description}
-      </Text>
-      <View style={styles.complaintFooter}>
-        <Text style={[styles.status, getStatusStyle(item.status)]}>
-          {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+  const renderComplaint = ({ item }: { item: Complaint }) => {
+    const getPriorityStyle = (priority: string) => {
+      switch (priority) {
+        case 'low':
+          return styles.priorityLow;
+        case 'medium':
+          return styles.priorityMedium;
+        case 'high':
+          return styles.priorityHigh;
+        case 'urgent':
+          return styles.priorityUrgent;
+        default:
+          return styles.priorityMedium;
+      }
+    };
+
+    const getPriorityText = (priority: string) => {
+      switch (priority) {
+        case 'low':
+          return 'Rendah';
+        case 'medium':
+          return 'Sedang';
+        case 'high':
+          return 'Tinggi';
+        case 'urgent':
+          return 'Mendesak';
+        default:
+          return 'Sedang';
+      }
+    };
+
+    return (
+      <TouchableOpacity 
+        style={styles.complaintCard}
+        onPress={() => router.push({ pathname: '/complaint-detail', params: { complaintId: item.id.toString() } })}
+      >
+        <Text style={styles.complaintTitle}>{item.title}</Text>
+        <Text style={styles.complaintDescription} numberOfLines={2}>
+          {item.description}
         </Text>
-        <Text style={styles.date}>
-          {new Date(item.created_at).toLocaleDateString()}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
+        <View style={styles.complaintMeta}>
+          {item.category && (
+            <View style={styles.categoryBadge}>
+              <Text style={styles.categoryText}>{item.category.name}</Text>
+            </View>
+          )}
+          {item.priority && (
+            <View style={[styles.priorityBadge, getPriorityStyle(item.priority)]}>
+              <Text style={styles.priorityText}>{getPriorityText(item.priority)}</Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.complaintFooter}>
+          <Text style={[styles.status, getStatusStyle(item.status)]}>
+            {getStatusText(item.status)}
+          </Text>
+          <Text style={styles.date}>
+            {new Date(item.created_at).toLocaleDateString()}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'Menunggu';
+      case 'reviewed':
+        return 'Dalam Proses';
+      case 'resolved':
+        return 'Selesai';
+      default:
+        return status;
+    }
+  };
 
   const getStatusStyle = (status: string) => {
     switch (status.toLowerCase()) {
@@ -322,6 +371,45 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginBottom: 10,
+  },
+  complaintMeta: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 10,
+    gap: 8,
+  },
+  categoryBadge: {
+    backgroundColor: '#E3F2FD',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  categoryText: {
+    fontSize: 11,
+    color: '#1976D2',
+    fontWeight: '600',
+  },
+  priorityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  priorityText: {
+    fontSize: 11,
+    color: '#fff',
+    fontWeight: '600',
+  },
+  priorityLow: {
+    backgroundColor: '#9E9E9E',
+  },
+  priorityMedium: {
+    backgroundColor: '#2196F3',
+  },
+  priorityHigh: {
+    backgroundColor: '#FF9800',
+  },
+  priorityUrgent: {
+    backgroundColor: '#F44336',
   },
   complaintFooter: {
     flexDirection: 'row',

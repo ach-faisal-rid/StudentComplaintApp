@@ -6,16 +6,27 @@ interface User {
   email: string;
 }
 
+interface Category {
+  id: number;
+  name: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 interface Complaint {
   id: number;
   user_id: number;
+  category_id: number | null;
   title: string;
   description: string;
   image_path: string | null;
   status: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
   created_at: string;
   updated_at: string;
   user?: User;
+  category?: Category;
 }
 
 // Statistics interface
@@ -53,6 +64,19 @@ export const getComplaints = async (): Promise<Complaint[]> => {
   }
 };
 
+// Get all categories
+export const getCategories = async (): Promise<Category[]> => {
+  try {
+    console.log('Fetching categories...'); // Debug log
+    const response = await api.get('/categories');
+    console.log('Categories response:', response.data); // Debug log
+    return response.data.categories || [];
+  } catch (error: any) {
+    console.error('Error fetching categories:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 // Get complaint statistics
 export const getComplaintStats = async (): Promise<StatsResponse> => {
   try {
@@ -79,7 +103,14 @@ export const getComplaint = async (id: number): Promise<Complaint> => {
 };
 
 // Create a new complaint
-export const createComplaint = async (data: FormData | { title: string; description: string }): Promise<Complaint> => {
+export const createComplaint = async (
+  data: FormData | { 
+    title: string; 
+    description: string; 
+    category_id: number; 
+    priority: 'low' | 'medium' | 'high' | 'urgent';
+  }
+): Promise<Complaint> => {
   try {
     let response;
     
@@ -113,6 +144,9 @@ export const createComplaint = async (data: FormData | { title: string; descript
     }
   }
 };
+
+// Export types
+export type { Complaint, Category, User };
 
 // Delete a complaint
 export const deleteComplaint = async (id: number): Promise<void> => {
